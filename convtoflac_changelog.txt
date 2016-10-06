@@ -1,0 +1,83 @@
+2.1.4 (09/03/2016):
+
+  Added support for WMA Lossless and Meridian Lossless Packing (MLP)
+
+
+2.1.3 (06/08/2010):
+
+  Changed to $() format for command substitution for better readability
+  Changed binary detection code to newer, more compact format
+  Fixed inability to use ffmpeg to transcode files outside of current directory
+
+
+2.1.2 (05/02/2010):
+
+  Added -V option to report version
+  Fixed inconsistent output when converting multiple files concurrently
+
+
+2.1.1 (10/04/2009):
+
+  Fixed problem with file names containing spaces (again)
+
+
+2.1 (09/27/2009):
+
+  Added support for converting multiple files concurrently;
+    detailed progress is not displayed when concurrency is enabled
+  Added support for ffmpeg as an optional decoder for input files;
+    useful if you do not have the default decoder, such as 'mac' for APE files;
+    supports ALAC, APE, Shorten, and WavPack files;
+	ffmpeg does NOT support copying metadata to FLAC files
+  Added option for moving files to trash instead of deleting them
+  Changed binary detection to make metadata-only binaries optional
+  Changed binary detection script order to improve efficiency
+  Changed overwrite argument from -f to -o
+  Fixed cosmetic error in sed binary detection
+  Fixed compression option validation
+  Fixed issue with binary detection in some environments
+
+
+2.0.2 (08/24/2009):
+
+  Updated ALAC tag processing to libmp4v2 implementation of mp4info
+
+
+2.0.1 (05/14/2009):
+
+  Fixed multiple input file support - can not properly handle files with spaces
+
+
+2.0 (05/14/2009):
+
+  Added support for multiple input files
+  Added support for Apple Lossless (ALAC, or M4A)
+  Added support for True Audio (TTA) (no tags)
+  Added option to not copy existing tags during transcode
+  Added option to overwrite existing files
+  Added (previously missing) verification for sed
+  Fixed error checking to ensure that both decoding and encoding are successful
+  Updated prerequisite verification to NOT use hard-coded paths for binaries
+
+
+1.1 (02/18/2007):
+
+  Added support for FLAC input
+  Added support for WAV input
+  Added support for specifying FLAC compression level
+  Fixed more documentation typos
+
+
+1.0.1 (09/01/2006):
+
+  Fixed some typos in the requirements documentation
+
+
+1.0 (08/27/2006):
+
+  Initial release
+
+
+TODO:
+  include embedded album cover
+  add support for TTA tags (id3)
