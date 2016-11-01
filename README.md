@@ -9,7 +9,7 @@ Convert to FLAC currently supports the following input formats:
 *   [Apple Lossless](http://en.wikipedia.org/wiki/Apple_Lossless) (ALAC) - requires [alac](http://craz.net/programs/itunes/alac.html) and [mp4info](http://mpeg4ip.sourceforge.net/) (for metadata) binaries
 *   [FLAC](http://flac.sourceforge.net/) (eg., for transcoding to a different compression ratio)
 *   [Meridian Lossless Packing](https://en.wikipedia.org/wiki/Meridian_Lossless_Packing) (MLP) - commonly found on DVD-Audio and Blu-ray discs; requires `ffmpeg`
-*   [Monkey's Audio](http://www.monkeysaudio.com/) (APE) - requires [mac](http://www.supermmx.org/linux/mac/) and [apeinfo](/software/apeinfo) (for metadata) binaries
+*   [Monkey's Audio](http://www.monkeysaudio.com/) (APE) - requires [mac](http://www.supermmx.org/linux/mac/) and [apeinfo](http://legroom.net/software/apeinfo) (for metadata) binaries
 *   [Shorten](http://www.etree.org/shnutils/shorten/) - requires `shorten` binary
 *   [True Audio](http://www.true-audio.com/) (TTA) - requires `ttaenc` binary
 *   [WAVE](http://en.wikipedia.org/wiki/WAV)
