@@ -3,7 +3,7 @@
 # -----------------------------------------------------------------------------
 #
 #	App Title:      convtoflac.sh
-#	App Version:    2.1.4
+#	App Version:    2.1.5
 #	Author:         Jared Breland <jbreland@legroom.net>
 #	Homepage:       http://www.legroom.net/software
 #
@@ -43,7 +43,7 @@
 #		wvunpack (http://www.wavpack.com/)
 #			used to decompress WavPack files
 #		ffmpeg (http://www.ffmpeg.org/)
-#			used to decompress MLP and WMA files
+#			used to decompress MLP, TAK, and lossles WMA files
 #			optionally used to decompress ALAC, APE, Shorten, and WavPack files
 #
 #	Please visit the application's homepage for additional information.
@@ -51,7 +51,7 @@
 # -----------------------------------------------------------------------------
 
 # Static variables
-readonly VERSION="2.1.4"
+readonly VERSION="2.1.5"
 readonly PROG=$(basename $0)
 
 # Setup environment
@@ -62,6 +62,7 @@ USEFFMPEG=''
 COMPRESS=8
 THREADS=1
 COPYTAGS=1
+KEEPFOREIGN=''
 FILES=()
 COLOR='\E[33;40m\033[1m' #comment these out if your term doesn't support colors
 COLORWARN='\E[31;40m\033[1m'
@@ -82,6 +83,7 @@ function warning() {
 	echo -ne "        Note: Existing tags will not be copied if ffmpeg is used\n"
 	echo -ne "   -tN  Convert N number of files concurrently; default is 1\n"
 	echo -ne "   -n   Do not copy existing tags to new FLAC file\n"
+	echo -ne "   -k   Keep foreign metadata not natively supported by FLAC\n"
 	echo -ne "   -o   Overwrite existing output FLAC files\n"
 	echo -ne "   -cN  Set FLAC compression level, where N = 0 (fast) - 8 (best); default is 8\n"
 	echo -ne "\nSupported input formats:\n"
@@ -94,6 +96,7 @@ function warning() {
 	echo -ne "   WavPack (.wv)\n"
 	echo -ne "\nSupported ffmpeg-only input formats:\n"
 	echo -ne "   Meridian Lossless Packing (.mlp)\n"
+	echo -ne "   Tom's lossless Audio Kompressor (TAK)\n"
 	echo -ne "   Windows Media Audio Lossless (.wma)\n"
 	exit
 }
@@ -167,6 +170,11 @@ function bincheck() {
 			elif [ ! -e "$SHORTEN" ]; then
 				MISSING+='shorten, '
 			fi
+		;;
+		"tak")
+			USEFFMPEG=true
+			COPYTAGS=''
+			ffmpeg_check
 		;;
 		"tta")
 			TTAENC=$(which ttaenc 2>/dev/null)
@@ -264,10 +272,11 @@ function transcode() {
 	QUIET=''
 
 	# Use ffmpeg, if requested, to decode input
-	if [ -n "$USEFFMPEG" ] && [ "$EXT" == "ape" -o "$EXT" == "m4a" -o "$EXT" == "mlp" -o "$EXT" == "shn" -o "$EXT" == "wv" -o "$EXT" == "wma" ]; then
+	if [ -n "$USEFFMPEG" ] && [ "$EXT" == "ape" -o "$EXT" == "m4a" -o "$EXT" == "mlp" -o "$EXT" == "shn" -o "$EXT" == "tak" -o "$EXT" == "wv" -o "$EXT" == "wma" ]; then
 
 		# If WMA, additionally verify file is lossless before continuing
-		if [ $($FFMPEG -i "$FILE" 2>&1 | grep 'Stream.*Audio:' | grep wmalossless | wc -l) -lt 1 ]; then
+		if [ "$EXT" == "wma" \
+			-a $($FFMPEG -i "$FILE" 2>&1 | grep 'Stream.*Audio:' | grep wmalossless | wc -l) -lt 1 ]; then
 			cwarn "\nError: \"$FILE\" is a lossy WMA.  This should not be converted to FLAC."
 			exit 1
 		fi
@@ -281,7 +290,7 @@ function transcode() {
 			rm "$WAVENAME.wav"
 			exit 1
 		fi
-		eval $FLAC -$COMPRESS $OVERWRITE -o \"$NAME.flac\" \"$WAVENAME.wav\" $QUIET
+		eval $FLAC -$COMPRESS $KEEPFOREIGN $OVERWRITE -o \"$NAME.flac\" \"$WAVENAME.wav\" $QUIET
 		if [ $? -ne 0 ]; then
 			cwarn "\nError: \"$FILE\" could not be converted to a FLAC file."
 			rm "$WAVENAME.wav"
@@ -295,7 +304,7 @@ function transcode() {
 		# Monkey's Audio input
 		if [ "$EXT" == "ape" ]; then
 			[ $THREADS -gt 1 ] && QUIET='2>/dev/null'
-			eval $MAC \"$FILE\" - -d $QUIET | $FLAC -$COMPRESS $OVERWRITE -s -o "$NAME.flac" -
+			eval $MAC \"$FILE\" - -d $QUIET | $FLAC -$COMPRESS $KEEPFOREIGN $OVERWRITE -s -o "$NAME.flac" -
 
 		# FLAC input
 		elif [ "$EXT" == "flac" ]; then
@@ -312,7 +321,7 @@ function transcode() {
 			fi
 			FILE="${NAME}_old.flac"
 			[ $THREADS -gt 1 ] && QUIET='-s'
-			$FLAC -d "$FILE" $QUIET -c | $FLAC -$COMPRESS $OVERWRITE -s -o "$NAME.flac" -
+			$FLAC -d "$FILE" $QUIET -c | $FLAC -$COMPRESS $KEEPFOREIGN $OVERWRITE -s -o "$NAME.flac" -
 
 		# ALAC input
 		elif [ "$EXT" == "m4a" ]; then
@@ -323,27 +332,27 @@ function transcode() {
 				exit 1
 			fi
 			[ $THREADS -gt 1 ] && QUIET='-s'
-			$ALAC "$FILE" | $FLAC -$COMPRESS $OVERWRITE $QUIET -o "$NAME.flac" -
+			$ALAC "$FILE" | $FLAC -$COMPRESS $KEEPFOREIGN $OVERWRITE $QUIET -o "$NAME.flac" -
 
 		# Shorten input
 		elif [ "$EXT" == "shn" ]; then
 			[ $THREADS -gt 1 ] && QUIET='-s'
-			$SHORTEN -x "$FILE" - | $FLAC -$COMPRESS $OVERWRITE $QUIET -o "$NAME.flac" -
+			$SHORTEN -x "$FILE" - | $FLAC -$COMPRESS $KEEPFOREIGN $OVERWRITE $QUIET -o "$NAME.flac" -
 
 		# True Audio input
 		elif [ "$EXT" == "tta" ]; then
 			[ $THREADS -gt 1 ] && QUIET='2>/dev/null'
-			eval $TTAENC -d -o - \"$FILE\" $QUIET | $FLAC -$COMPRESS $OVERWRITE -s -o "$NAME.flac" -
+			eval $TTAENC -d -o - \"$FILE\" $QUIET | $FLAC -$COMPRESS $KEEPFOREIGN $OVERWRITE -s -o "$NAME.flac" -
 
 		# WAVE input
 		elif [ "$EXT" == "wav" ]; then
 			[ $THREADS -gt 1 ] && QUIET='-s'
-			$FLAC -$COMPRESS $OVERWRITE $QUIET -o "$NAME.flac" "$FILE"
+			$FLAC -$COMPRESS $KEEPFOREIGN $OVERWRITE $QUIET -o "$NAME.flac" "$FILE"
 
 		# WavPack input
 		elif [ "$EXT" == "wv" ]; then
 			[ $THREADS -gt 1 ] && QUIET='-q'
-			$WVUNPACK $QUIET "$FILE" -o - | $FLAC -$COMPRESS $OVERWRITE -s -o "$NAME.flac" -
+			$WVUNPACK $QUIET "$FILE" -o - | $FLAC -$COMPRESS $KEEPFOREIGN $OVERWRITE -s -o "$NAME.flac" -
 		fi
 	fi
 
@@ -445,6 +454,8 @@ else
 			fi
 		elif [ "$1" == "-n" ]; then
 			COPYTAGS=''
+		elif [ "$1" == "-k" ]; then
+			KEEPFOREIGN='--keep-foreign-metadata'
 		elif [ "$1" == "-o" ]; then
 			OVERWRITE='-f'
 		elif [ "$1" == "-f" ]; then
@@ -494,7 +505,7 @@ for FILE in ${FILES[@]}; do
 	EXT=$(echo "${FILE##*.}" | $SED 's/\(.*\)/\L\1/')
 
 	# Exit if wrong file passed
-	if [[ "$EXT" != "ape" && "$EXT" != "flac" && "$EXT" != "m4a" && "$EXT" != "mlp" && "$EXT" != "shn" && "$EXT" != "tta" && "$EXT" != "wav" && "$EXT" != "wv" && "$EXT" != "wma" ]]; then
+	if [[ "$EXT" != "ape" && "$EXT" != "flac" && "$EXT" != "m4a" && "$EXT" != "mlp" && "$EXT" != "shn" && "$EXT" != "tak" && "$EXT" != "tta" && "$EXT" != "wav" && "$EXT" != "wv" && "$EXT" != "wma" ]]; then
 		echo "Error: '$FILE' is not a supported input format"
 		exit 1
 	fi

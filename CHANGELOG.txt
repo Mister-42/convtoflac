@@ -1,3 +1,10 @@
+2.1.5 (11/26/2019):
+
+  Added -k option to keep foreign metadata
+  Added support for TAK files via ffmpeg
+  Fixed bug preventing ffmpeg from decoding non-WMA files
+
+
 2.1.4 (09/03/2016):
 
   Added support for WMA Lossless and Meridian Lossless Packing (MLP)
