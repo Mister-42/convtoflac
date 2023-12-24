@@ -477,12 +477,12 @@ if [[ "$COMPRESS" != [0-8] ]]; then
 fi
 
 # Define and verify core apps exist
-SED=$(which sed 2>/dev/null)
+TR=$(which tr 2>/dev/null)
 FLAC=$(which flac 2>/dev/null)
 METAFLAC=$(which metaflac 2>/dev/null)
 TPUT=$(which trash-put 2>/dev/null)
 MISSING=''
-[ ! -e "$SED" ] && MISSING+='sed, '
+[ ! -e "$TR" ] && MISSING+='tr, '
 [ ! -e "$FLAC" ] && MISSING+='flac, '
 [ ! -e "$METAFLAC" ] && MISSING+='metaflac, '
 [ "$DELETE" == "move" -a ! -e "$TPUT" ] && MISSING+='trash-put, '
@@ -502,7 +502,7 @@ for FILE in ${FILES[@]}; do
 
 	# Determine file type and base filename
 	NAME=${FILE%.*}
-	EXT=$(echo "${FILE##*.}" | $SED 's/\(.*\)/\L\1/')
+	EXT=$(echo "${FILE##*.}" | $TR '[:upper:]' '[:lower:]')
 
 	# Exit if wrong file passed
 	if [[ "$EXT" != "ape" && "$EXT" != "flac" && "$EXT" != "m4a" && "$EXT" != "mlp" && "$EXT" != "shn" && "$EXT" != "tak" && "$EXT" != "tta" && "$EXT" != "wav" && "$EXT" != "wv" && "$EXT" != "wma" ]]; then
