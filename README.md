@@ -11,7 +11,7 @@ Convert to FLAC currently supports the following input formats:
 *   [Meridian Lossless Packing](https://en.wikipedia.org/wiki/Meridian_Lossless_Packing) (MLP) - commonly found on DVD-Audio and Blu-ray discs; requires `ffmpeg`
 *   [Monkey's Audio](http://www.monkeysaudio.com/) (APE) - requires [mac](http://www.supermmx.org/linux/mac/) and [apeinfo](http://legroom.net/software/apeinfo) (for metadata) binaries
 *   [Shorten](http://shnutils.freeshell.org/shorten/) - requires `shorten` binary
-*   [True Audio](http://www.true-audio.com/) (TTA) - requires `ttaenc` binary
+*   [True Audio](https://tausoft.org/en/true-audio-%d0%ba%d0%be%d0%b4%d0%b5%d0%ba-tta/) (TTA) - requires `ttaenc` binary
 *   [WAVE](http://en.wikipedia.org/wiki/WAV)
 *   [WavPack](http://www.wavpack.com/) - requires `wvunpack` binary
 *   [Windows Media Audio Lossless](https://en.wikipedia.org/wiki/Windows_Media_Audio#Windows_Media_Audio_Lossless) (WMA) - requires `ffmpeg`
